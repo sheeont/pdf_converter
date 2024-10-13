@@ -56,7 +56,7 @@ def preview_pdf_pages(pdf_path, selected_pages_order):
 
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
-    preview_window.geometry(f"{int(screen_width * 0.4)}x{int(screen_height * 0.4)}")
+    preview_window.geometry(f"{int(screen_width * 0.7)}x{int(screen_height * 0.7)}")
     preview_window.minsize(600, 400)
 
     canvas = Canvas(preview_window)
@@ -78,6 +78,7 @@ def preview_pdf_pages(pdf_path, selected_pages_order):
             event.widget.config(borderwidth=2, relief="solid")
 
     thumbnail_width = 250
+    page_labels = []
     for i, page in enumerate(doc):
         pix = page.get_pixmap(dpi=75)
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
@@ -88,10 +89,19 @@ def preview_pdf_pages(pdf_path, selected_pages_order):
         label.image = img_tk
         label.grid(row=i // 2, column=i % 2, padx=5, pady=5)
         label.bind("<Button-1>", lambda event, i=i: on_page_click(event, i))
+        page_labels.append(label)
+
+    def select_all_pages():
+        """Выбирает все страницы PDF для объединения."""
+        for i, label in enumerate(page_labels):
+            if (pdf_path, i) not in selected_pages_order:
+                selected_pages_order.append((pdf_path, i))
+                label.config(borderwidth=2, relief="solid")
 
     canvas.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
 
+    Button(preview_window, text="Выбрать все", command=select_all_pages).pack(pady=5)
     Button(preview_window, text="Закрыть", command=preview_window.destroy).pack(pady=10)
 
 
